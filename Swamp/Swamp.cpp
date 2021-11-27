@@ -1,10 +1,40 @@
 ﻿#include <iostream>
 #include "./Kiwii/ScreenText.h"
 #include <sstream>
-#include <conio.h>
 #include <vector>
 
-class Obgect {
+class Memory {
+protected:
+    std::wstring _name = L"[name]";
+    std::wstring Write(std::wstring name, std::wstring what) {
+        return L"Have:\t" + name+L" = \""+what+L"\"\n";
+    }
+    std::wstring Write(std::wstring name, wchar_t what) {
+        return L"Have:\t" + name + L" = '" + what + L"'\n";
+    }
+    template<typename T>
+    std::wstring Write(std::wstring name, T what) {
+        return L"Have:\t"+name + L" = " + std::to_wstring(what) + L"\n";
+    }
+public:
+    void Name(std::wstring name) {
+        _name = name;
+    }
+    std::wstring Name() {
+        return _name;
+    }
+    
+    virtual void Info() {
+        std::wcout << "Info:\t\"Memory\" is main class or father of all classes\n";
+        std::wcout << "     \t"<<Write(L"_name", _name);
+        _wsystem(L"pause");
+    }
+};
+
+class Obgect
+    :public Memory{
+protected:
+
     _COORD _pos;
     wchar_t _symbol = L'!';
 
@@ -25,21 +55,32 @@ public:
         _pos.Y += y;
     }
 
-    void Symbol(wchar_t symbol) {
+    virtual void Info() {
+        std::wcout << "Info:\t\"Obgect\" is movement class\n";
+        std::wcout << "     \t" << Write(L"_name", _name);
+        std::wcout << "     \t" << Write(L"_pos.X", _pos.X);
+        std::wcout << "     \t" << Write(L"_pos.Y", _pos.Y);
+        std::wcout << "     \t" << Write(L"_symbol", _symbol);
+        _wsystem(L"pause");
+    }
+
+    void Sym(wchar_t symbol) {
         _symbol=symbol;
     }
-    wchar_t Symbol() {
+    wchar_t Sym() {
         return _symbol;
     }
 };
 
-class Item {
+class Item
+    : public Obgect {
     bool is_laid = 0;
-
+    int nPlace=1;
+public:
 
 };
 
-class Inventory {
+class Map {
 
 };
 
@@ -50,20 +91,21 @@ int main()
     //ux.SetupS(24, 8);
     Obgect a;
     a.Pos(5,5);
+    a.Name(L"Obgect");
     std::vector<Obgect> coin;
     coin.resize(10);
 
     for (int i = 0;i < coin.size();i++) {
         coin[i].Pos(rand() % 61, rand() % 16);
-        coin[i].Symbol(L'X');
+        coin[i].Sym(L'X');
     }
 
     int coins = 0;
 
     std::wstring map[16];
     while (true) {
-        system("cls");
-        a.Symbol(L'@');
+        _wsystem(L"cls");
+        a.Sym(L'@');
         if (GetAsyncKeyState(VK_UP)|| GetAsyncKeyState('W')) {
             if (map[a.Y() - 1][a.X()] == L' ' || map[a.Y() - 1][a.X()] == L'X')
                 a.Slide(0, -1);
@@ -81,34 +123,11 @@ int main()
                 a.Slide(1, 0);
         }
         if (GetAsyncKeyState(VK_ESCAPE)) {
-            system("pause");
+            _wsystem(L"pause");
         }
-
-        /*if (_kbhit()) {
-            switch (_getwch())
-            {
-            case L'w':
-                if(map[a.Y() - 1][a.X()]==L' ')
-                    a.Pos(a.X(),(a.Y() - 1));
-                break;
-            case L'a':
-                if (map[a.Y()][(a.X() - 1)] == L' ')
-                    a.Pos((a.X() - 1), a.Y());
-                break;
-            case L's':
-                if (map[a.Y() + 1][a.X()] == L' ')
-                    a.Pos(a.X(), (a.Y() + 1));
-                break;
-            case L'd':
-                if (map[a.Y()][(a.X() + 1)] == L' ')
-                    a.Pos((a.X() + 1), a.Y());
-                break;
-            default:
-                break;
-            }
+        if (GetAsyncKeyState(VK_TAB)) {
+            a.Info();
         }
-
-        */
 
         map[0] = L":::::::#------------#------------#-----------------------#::";
         map[1] = L":::::::|            |            |                       |::";
@@ -126,25 +145,11 @@ int main()
         map[13]= L":::::::#-------#------#----#     #      |:::::::::::::::::::";
         map[14]= L"::::::::::::::::::::::|                 |:::::::::::::::::::";
         map[15]= L"::::::::::::::::::::::#-----------------#:::::::::::::::::::";
-
-        for (int i = 0;i < coin.size();i++) 
-            if (a.Y() == coin[i].Y() && a.X() == coin[i].X()) {
-                do {
-                    coin[i].Pos(rand() % 61, rand() % 16);
-                    } while (map[coin[i].Y()][coin[i].X()] != L' ');
-                coins++;
-            };
-
-        for (int i = 0;i < coin.size();i++) while(map[coin[i].Y()][coin[i].X()] != L' ') coin[i].Pos(rand() % 61, rand() % 16);
-
         
-
-        for (int i = 0;i < coin.size();i++) map[coin[i].Y()][coin[i].X()] = L'X';
         
-        map[a.Y()][a.X()] = a.Symbol();
+        map[a.Y()][a.X()] = a.Sym();
 
         for (int i = 0;i < 16;i++) std::wcout << map[i]<<'\n';
-        std::wcout << "Coins = " << coins;
         //ux.Out();
         Sleep(40);
     }
