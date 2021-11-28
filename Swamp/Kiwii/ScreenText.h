@@ -24,7 +24,8 @@ namespace kiwii {
 		int SQUARE() {
 			return _width * _height;
 		}
-		virtual void Setup();
+
+		virtual void Setup() {}
 
 		void SetupS(WORD Width, WORD Height);
 

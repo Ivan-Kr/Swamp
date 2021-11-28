@@ -86,7 +86,7 @@ class Map {
 
 int main()
 {
-    //kiwii::ScreenText ux;
+    kiwii::ScreenText ux;
 
     //ux.SetupS(24, 8);
     Obgect a;
