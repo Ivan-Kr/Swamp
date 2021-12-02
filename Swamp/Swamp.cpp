@@ -1,7 +1,9 @@
 ﻿#include <iostream>
 #include "./Kiwii/ScreenText.h"
+#include "./Kiwii/Time Act.h"
 #include <sstream>
 #include <vector>
+#include <array>
 
 class Memory {
 protected:
@@ -80,13 +82,15 @@ public:
 
 };
 
-class Map {
-    std::vector<std::vector<wchar_t>> _map;
+class Mapp {
+    //std::array<wchar_t,8>_map;
+
+    std::vector<std::vector<wchar_t>>_map;
 
     int _x;
     int _y;
 public:
-    Map(int x, int y) {
+    Mapp(int x, int y) {
         _x = x;
         _y = y;
 
@@ -94,17 +98,61 @@ public:
         for (int i = 0;i < _y;i++)_map[i].resize(_x);
     }
 
+    wchar_t GetSym(int x, int y) {
+        if (0 <= y && y < _y && 0 <= x && x < _x) return _map[y][x];
+        else return L'\0';
+    }
+    std::wstring GetLine(int y) {
+        std::wstring line = L"";
+
+        for (int i = 0;i < _map[y].size();i++) line += _map[y][i];
+
+        return line;
+    }
+
     void SetLine(int y, std::wstring string) {
-        for (int i = 0;i < y;i++) _map[y][i] = string[i];
+        for (int i = 0;i < _map[y].size();i++) _map[y][i] = string[i];
     }
     void SetLines(std::wstring string) {
-        for (int i = 0;i < string.size();i++) _map[i/_x][i%_x] = string[i];
+        for (int i = 0;i < string.size();i++) _map[i / _x][i % _x] = string[i];
+    }
+};
+
+class Map {
+    static const size_t __x=128;
+    static const size_t __y=128;
+    std::array<std::array<wchar_t, __x>, __y>_map;
+    size_t _tx = 0;
+    size_t _ty = 0;
+public:
+    wchar_t GetSym(int x, int y) {
+        if (0 <= y && y < _ty && 0 <= x && x < _tx) return _map[y][x];
+        else return L'\0';
+    }
+    std::wstring GetLine(int y) {
+        std::wstring line=L"";
+
+        for (int i = 0;i < _map[y].size();i++) line += _map[y][i];
+
+        return line;
+    }
+
+    void SetSym(int x, int y, wchar_t ch) {
+        if (0 <= y && y < _ty && 0 <= x && x < _tx)
+            _map[y][x] = ch;
+    }
+    void SetLine(int y, std::wstring string) {
+        for (int i = 0;i < _map[y].size();i++) _map[y][i] = string[i];
+    }
+    void SetLines(std::wstring string) {
+        for (int i = 0;i < string.size();i++) _map[i/__x][i%__x] = string[i];
     }
 };
 
 int main()
 {
     kiwii::ScreenText ux;
+    Map gg;
 
     //ux.SetupS(24, 8);
     Obgect a;
@@ -146,38 +194,38 @@ int main()
         if (GetAsyncKeyState(VK_F1)) {
             a.Info();
         }
-
+        gg.SetLine(0, L":::::::#------------#------------#-----------------------#::");
         map[0]  = L":::::::#------------#------------#-----------------------#::";
-        map[1]  = L":::::::#------------#------------#-----------------------#::";
+        map[1]  = L":::::::|            |            |                       |::";
         map[2]  = L":::::::|            |            |                       |::";
-        map[3]  = L":::::::|            |            |                       |::";
+        map[3]  = L":::::::|            |            #---------#             |::";
         map[4]  = L":::::::|            |            |                       |::";
         map[5]  = L":::::::|            |            |                       |::";
-        map[6]  = L"#------#    #-------#-#  #-#     #---------#-#  #---#  #-#::";
+        map[6]  = L":::::::|            |            |                       |::";
         map[7]  = L"#------#    #-------#-#  #-#     #---------#-#  #---#  #-#::";
         map[8]  = L"|                          |               |        |  |::::";
         map[9]  = L"|                          |               |        |  |::::";
-        map[10] = L"|      #    #--------------#---# #---# #---#        |  |::::";
-        map[11] = L"|      #    #--------------#---# #---# #---#        |  |::::";
+        map[10] = L"|      #                   |               |        |  |::::";
+        map[11] = L"|      |    #--------------#---# #---# #---#        |  |::::";
         map[12] = L"|      |                         |:::| |            |  |::::";
         map[13] = L"|      |                         |:::| |            |  |::::";
-        map[14] = L"#-#  #-#---------#            #--#---# #------------#  #---#";
+        map[14] = L"|      |                         |:::| |            |  |::::";
         map[15] = L"#-#  #-#---------#            #--#---# #------------#  #---#";
-        map[16] = L"|      |             #-----#                        |      |";
+        map[16] = L"|      |                                            |      |";
         map[17] = L"|      |             #-----#                        |      |";
         map[18] = L"|      #---#   #           |                        |      |";
-        map[19] = L"|      #---#   #           |                        |      |";
-        map[20] = L"|          |   |    #------#-----#----------#  #----#--#   |";
+        map[19] = L"|          |   |           |                        |      |";
+        map[20] = L"|          |   |           |                        |      |";
         map[21] = L"|          |   |    #------#-----#----------#  #----#--#   |";
-        map[22] = L"#------#   #   |                 |                         |";
+        map[22] = L"|          |   |                 |                         |";
         map[23] = L"#------#   #   |                 |                         |";
-        map[24] = L":::::::|       |                 |      #-----------#------#";
-        map[25] = L":::::::|       |                 |      #-----------#------#";
-        map[26] = L":::::::#-------#------#----#     #      |:::::::::::::::::::";
+        map[24] = L":::::::|       |                 |      #------------------#";
+        map[25] = L":::::::|       |                 |      |:::::::::::::::::::";
+        map[26] = L":::::::|       |                 |      |:::::::::::::::::::";
         map[27] = L":::::::#-------#------#----#     #      |:::::::::::::::::::";
         map[28] = L"::::::::::::::::::::::|                 |:::::::::::::::::::";
         map[29] = L"::::::::::::::::::::::|                 |:::::::::::::::::::";
-        map[30] = L"::::::::::::::::::::::#-----------------#:::::::::::::::::::";
+        map[30] = L"::::::::::::::::::::::|                 |:::::::::::::::::::";
         map[31] = L"::::::::::::::::::::::#-----------------#:::::::::::::::::::";
         
         
@@ -185,8 +233,10 @@ int main()
 
         for (int i = 0;i < 32;i++) std::wcout << map[i] <<'\n';
         //ux.Out();
-        Sleep(40);
+        //Sleep(40);
     }
+    
+
 
     return 0;
 }
