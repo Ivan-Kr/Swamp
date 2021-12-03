@@ -15,7 +15,7 @@ namespace kiwii {
 		HANDLE _hconsole;
 		DWORD _dwbyteswritten = 0;
 
-		double _aspect;
+		double _aspect=0;
 
 		wchar_t* _screen;
 

@@ -7,6 +7,8 @@
 
 class Memory {
 protected:
+    int pointer;
+
     std::wstring _name = L"[name]";
     std::wstring Write(std::wstring name, std::wstring what) {
         return L"Have:\t" + name+L" = \""+what+L"\"\n";
@@ -28,13 +30,13 @@ public:
     
     virtual void Info() {
         std::wcout << "Info:\t\"Memory\" is main class or father of all classes\n";
+        std::wcout << "     \t" << Write(L"&Memory", (long long)&pointer);
         std::wcout << "     \t"<<Write(L"_name", _name);
-        _wsystem(L"pause");
     }
 };
 
 class Obgect
-    :public Memory{
+    :public Memory {
 protected:
 
     _COORD _pos;
@@ -59,11 +61,11 @@ public:
 
     virtual void Info() {
         std::wcout << "Info:\t\"Obgect\" is movement class\n";
+        std::wcout << "     \t" << Write(L"&Memory", (long long)&pointer);
         std::wcout << "     \t" << Write(L"_name", _name);
         std::wcout << "     \t" << Write(L"_pos.X", _pos.X);
         std::wcout << "     \t" << Write(L"_pos.Y", _pos.Y);
         std::wcout << "     \t" << Write(L"_symbol", _symbol);
-        _wsystem(L"pause");
     }
 
     void Sym(wchar_t symbol) {
@@ -82,7 +84,9 @@ public:
 
 };
 
-class Mapp {
+class Map
+    :public Memory {
+protected:
     //std::array<wchar_t,8>_map;
 
     std::vector<std::vector<wchar_t>>_map;
@@ -90,7 +94,7 @@ class Mapp {
     int _x;
     int _y;
 public:
-    Mapp(int x, int y) {
+    Map(int x, int y) {
         _x = x;
         _y = y;
 
@@ -110,54 +114,46 @@ public:
         return line;
     }
 
-    void SetLine(int y, std::wstring string) {
-        for (int i = 0;i < _map[y].size();i++) _map[y][i] = string[i];
+    int X() {
+        return _x;
     }
-    void SetLines(std::wstring string) {
-        for (int i = 0;i < string.size();i++) _map[i / _x][i % _x] = string[i];
-    }
-};
-
-class Map {
-    static const size_t __x=128;
-    static const size_t __y=128;
-    std::array<std::array<wchar_t, __x>, __y>_map;
-    size_t _tx = 0;
-    size_t _ty = 0;
-public:
-    wchar_t GetSym(int x, int y) {
-        if (0 <= y && y < _ty && 0 <= x && x < _tx) return _map[y][x];
-        else return L'\0';
-    }
-    std::wstring GetLine(int y) {
-        std::wstring line=L"";
-
-        for (int i = 0;i < _map[y].size();i++) line += _map[y][i];
-
-        return line;
+    int Y() {
+        return _y;
     }
 
-    void SetSym(int x, int y, wchar_t ch) {
-        if (0 <= y && y < _ty && 0 <= x && x < _tx)
-            _map[y][x] = ch;
+    void SetClassObgect(Obgect clas) {
+        if (0 <= clas.Y() && clas.Y() < _y && 0 <= clas.X() && clas.X() < _x)
+            _map[clas.Y()][clas.X()]=clas.Sym();
     }
     void SetLine(int y, std::wstring string) {
         for (int i = 0;i < _map[y].size();i++) _map[y][i] = string[i];
     }
-    void SetLines(std::wstring string) {
-        for (int i = 0;i < string.size();i++) _map[i/__x][i%__x] = string[i];
+    void SetSym(int x, int y,wchar_t ch) {
+        if (0 <= y && y < _y && 0 <= x && x < _x) _map[y][x]=ch;
+    }
+
+    virtual void Info() {
+        std::wcout << "Info:\t\"Map\" is class location\n";
+        std::wcout << "     \t" << Write(L"&Memory", (long long)&pointer);
+        std::wcout << "     \t" << Write(L"_name", _name);
+        std::wcout << "     \t" << Write(L"_x", _x);
+        std::wcout << "     \t" << Write(L"_y", _y);
+        std::wcout << "     \t" << Write(L"_map", (long long)&_map);
     }
 };
 
 int main()
 {
     kiwii::ScreenText ux;
-    Map gg;
+
+    Obgect pawn;
+    Map map_(32,16);
 
     //ux.SetupS(24, 8);
-    Obgect a;
-    a.Pos(15,15);
-    a.Name(L"Obgect");
+
+    pawn.Pos(15,14);
+    pawn.Name(L"Obgect");
+    map_.Name(L"Map");
     std::vector<Obgect> coin;
     coin.resize(10);
 
@@ -167,71 +163,55 @@ int main()
     }
 
     int coins = 0;
-
-    std::wstring map[32];
+    //0xFFFFFFFFFFFFFFFF
+    //std::wstring map[32];
     while (true) {
         _wsystem(L"cls");
-        a.Sym(L'@');
+        pawn.Sym(L'@');
         if (GetAsyncKeyState(VK_UP)|| GetAsyncKeyState('W')) {
-            if (map[a.Y() - 1][a.X()] == L' ' || map[a.Y() - 1][a.X()] == L'X')
-                a.Slide(0, -1);
+            if (map_.GetSym(pawn.X(),pawn.Y() - 1) == L' ' || map_.GetSym(pawn.X(), pawn.Y() - 1) == L'X')
+                pawn.Slide(0, -1);
         }
         if (GetAsyncKeyState(VK_LEFT) || GetAsyncKeyState('A')) {
-            if (map[a.Y()][(a.X() - 1)] == L' ' || map[a.Y()][(a.X() - 1)] == L'X')
-                a.Slide(-1, 0);
+            if (map_.GetSym(pawn.X() - 1, pawn.Y()) == L' ' || map_.GetSym(pawn.X() - 1, pawn.Y() ) == L'X')
+                pawn.Slide(-1, 0);
         }
         if (GetAsyncKeyState(VK_DOWN) || GetAsyncKeyState('S')) {
-            if (map[a.Y() + 1][a.X()] == L' ' || map[a.Y()+1][(a.X())] == L'X')
-                a.Slide(0, 1);
+            if (map_.GetSym(pawn.X(), pawn.Y() + 1) == L' ' || map_.GetSym(pawn.X(), pawn.Y() + 1) == L'X')
+                pawn.Slide(0, 1);
         }
         if (GetAsyncKeyState(VK_RIGHT) || GetAsyncKeyState('D')) {
-            if (map[a.Y()][(a.X() + 1)] == L' ' || map[a.Y()][(a.X() + 1)] == L'X')
-                a.Slide(1, 0);
+            if (map_.GetSym(pawn.X() + 1, pawn.Y()) == L' ' || map_.GetSym(pawn.X() + 1, pawn.Y()) == L'X')
+                pawn.Slide(1, 0);
         }
         if (GetAsyncKeyState(VK_ESCAPE)) {
             _wsystem(L"pause");
         }
         if (GetAsyncKeyState(VK_F1)) {
-            a.Info();
+            pawn.Info();
+            map_.Info();
+            _wsystem(L"pause");
         }
-        gg.SetLine(0, L":::::::#------------#------------#-----------------------#::");
-        map[0]  = L":::::::#------------#------------#-----------------------#::";
-        map[1]  = L":::::::|            |            |                       |::";
-        map[2]  = L":::::::|            |            |                       |::";
-        map[3]  = L":::::::|            |            #---------#             |::";
-        map[4]  = L":::::::|            |            |                       |::";
-        map[5]  = L":::::::|            |            |                       |::";
-        map[6]  = L":::::::|            |            |                       |::";
-        map[7]  = L"#------#    #-------#-#  #-#     #---------#-#  #---#  #-#::";
-        map[8]  = L"|                          |               |        |  |::::";
-        map[9]  = L"|                          |               |        |  |::::";
-        map[10] = L"|      #                   |               |        |  |::::";
-        map[11] = L"|      |    #--------------#---# #---# #---#        |  |::::";
-        map[12] = L"|      |                         |:::| |            |  |::::";
-        map[13] = L"|      |                         |:::| |            |  |::::";
-        map[14] = L"|      |                         |:::| |            |  |::::";
-        map[15] = L"#-#  #-#---------#            #--#---# #------------#  #---#";
-        map[16] = L"|      |                                            |      |";
-        map[17] = L"|      |             #-----#                        |      |";
-        map[18] = L"|      #---#   #           |                        |      |";
-        map[19] = L"|          |   |           |                        |      |";
-        map[20] = L"|          |   |           |                        |      |";
-        map[21] = L"|          |   |    #------#-----#----------#  #----#--#   |";
-        map[22] = L"|          |   |                 |                         |";
-        map[23] = L"#------#   #   |                 |                         |";
-        map[24] = L":::::::|       |                 |      #------------------#";
-        map[25] = L":::::::|       |                 |      |:::::::::::::::::::";
-        map[26] = L":::::::|       |                 |      |:::::::::::::::::::";
-        map[27] = L":::::::#-------#------#----#     #      |:::::::::::::::::::";
-        map[28] = L"::::::::::::::::::::::|                 |:::::::::::::::::::";
-        map[29] = L"::::::::::::::::::::::|                 |:::::::::::::::::::";
-        map[30] = L"::::::::::::::::::::::|                 |:::::::::::::::::::";
-        map[31] = L"::::::::::::::::::::::#-----------------#:::::::::::::::::::";
+        map_.SetLine(0x00, L"#------#-----#----------#------#");
+        map_.SetLine(0x01, L"|      |     |          |      |");
+        map_.SetLine(0x02, L"|      |     |          |      |");
+        map_.SetLine(0x03, L"|      #     |          #--# #-#");
+        map_.SetLine(0x04, L"|            |          |      |");
+        map_.SetLine(0x05, L"|      #     |          |      |");
+        map_.SetLine(0x06, L"|      |     |          |      |");
+        map_.SetLine(0x07, L"#------# #---#-#  #-#   #--# #-#");
+        map_.SetLine(0x08, L"|                   |          |");
+        map_.SetLine(0x09, L"|                   |          |");
+        map_.SetLine(0x0a, L"|                   |          |");
+        map_.SetLine(0x0b, L"|      # #----------#-# #--# #-#");
+        map_.SetLine(0x0c, L"|      |                |      |");
+        map_.SetLine(0x0d, L"|      |                |      |");
+        map_.SetLine(0x0e, L"|      |                |      |");
+        map_.SetLine(0x0f, L"#------#----------------#------#");
         
-        
-        map[a.Y()][a.X()] = a.Sym();
+        map_.SetClassObgect(pawn);
 
-        for (int i = 0;i < 32;i++) std::wcout << map[i] <<'\n';
+        for (int i = 0;i < map_.Y();i++) std::wcout << map_.GetLine(i) <<'\n';
         //ux.Out();
         //Sleep(40);
     }
